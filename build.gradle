@@ -6,13 +6,8 @@
  * User Manual available at https://docs.gradle.org/5.2.1/userguide/tutorial_java_projects.html
  */
 
-plugins {
-    // Apply the java plugin to add support for Java
-    id 'java'
-
-    // Apply the application plugin to add support for building an application
-    id 'application'
-}
+apply plugin: 'java'
+apply plugin: 'application'
 
 repositories {
     // Use jcenter for resolving your dependencies.
@@ -22,11 +17,11 @@ repositories {
 
 dependencies {
     // This dependency is found on compile classpath of this component and consumers.
-    implementation 'com.google.guava:guava:27.0.1-jre'
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
 
-    // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }
 
-// Define the main class for the application
-mainClassName = 'statloader.App'
+mainClassName = 'App'
