@@ -1,6 +1,5 @@
 package cli;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -12,12 +11,9 @@ import static org.junit.Assert.assertTrue;
 
 public class CliArgumentsTest {
     private static final String[] BORDER_OPTS = {"--fromSeason", "2018", "--toSeason", "2019"};
-    private CliArguments arguments;
 
-    @Before
-    public void setUp() {
-        arguments = CliArguments.fromArgs(BORDER_OPTS);
-    }
+    private final static File FILE = new File("/tmp/abc/out.txt");
+
 
     @Test
     public void timeBordersPositiveTest() {
@@ -34,24 +30,21 @@ public class CliArgumentsTest {
 
     @Test
     public void requirePlayersStatTest() {
-        final File file = new File("/tmp/abc/out.txt");
+        String[] gamesOpts = {"--players", "--playersOutFile=" + FILE.getPath()};
 
-        String[] gamesOpts = {"--games", "--gamesOutFile", file.getPath()};
         String[] args = Stream.of(BORDER_OPTS, gamesOpts).flatMap(Stream::of).toArray(String[]::new);
 
         CliArguments arguments = CliArguments.fromArgs(args);
 
         assertTrue(arguments.argumentsAreCorrect());
 
-        assertTrue(arguments.isGamesStatRequired());
-        assertEquals(file, arguments.getGamesStatOutFile());
+        assertTrue(arguments.isPlayerStatRequired());
+        assertEquals(FILE, arguments.getPlayerStatOutFile());
     }
 
     @Test
     public void requireTeamsStatTest() {
-        final File file = new File("/tmp/abc/out.txt");
-
-        String[] gamesOpts = {"--teams", "--teamsOutFile", file.getPath()};
+        String[] gamesOpts = {"--teams", "--teamsOutFile", FILE.getPath()};
         String[] args = Stream.of(BORDER_OPTS, gamesOpts).flatMap(Stream::of).toArray(String[]::new);
 
         CliArguments arguments = CliArguments.fromArgs(args);
@@ -59,14 +52,12 @@ public class CliArgumentsTest {
         assertTrue(arguments.argumentsAreCorrect());
 
         assertTrue(arguments.isTeamsStatRequired());
-        assertEquals(file, arguments.getTeamsStatOutFile());
+        assertEquals(FILE, arguments.getTeamsStatOutFile());
     }
 
     @Test
-    public void gamesTeamsStatTest() {
-        final File file = new File("/tmp/abc/out.txt");
-
-        String[] gamesOpts = {"--games", "--gamesOutFile", file.getPath()};
+    public void requireGamesStatTest() {
+        String[] gamesOpts = {"--games", "--gamesOutFile", FILE.getPath()};
         String[] args = Stream.of(BORDER_OPTS, gamesOpts).flatMap(Stream::of).toArray(String[]::new);
 
         CliArguments arguments = CliArguments.fromArgs(args);
@@ -74,6 +65,6 @@ public class CliArgumentsTest {
         assertTrue(arguments.argumentsAreCorrect());
 
         assertTrue(arguments.isGamesStatRequired());
-        assertEquals(file, arguments.getGamesStatOutFile());
+        assertEquals(FILE, arguments.getGamesStatOutFile());
     }
 }

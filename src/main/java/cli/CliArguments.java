@@ -79,7 +79,7 @@ public class CliArguments {
             }
         }
 
-        return new OptionFlagAndOutFile(optionFlag, outFile);
+        return new OptionFlagAndOutFile(true, outFile);
     }
 
     private void parsePlayers() {
