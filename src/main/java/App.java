@@ -2,8 +2,8 @@ import cli.CliArguments;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dtos.GenericStat;
 import dtos.Skater;
-import dtos.SkatersStat;
 import httpclient.StatHttpClient;
 
 import java.io.BufferedOutputStream;
@@ -42,7 +42,7 @@ public class App {
     }
 
     private void loadPlayers() throws IOException, InterruptedException {
-        SkatersStat skatersStat = StatHttpClient.requestSkatersStat(cliArguments.getFromSeason(), cliArguments.getToSeason());
+        GenericStat<Skater> skatersStat = StatHttpClient.requestSkatersStat(cliArguments.getFromSeason(), cliArguments.getToSeason());
 
         CsvMapper mapper = (CsvMapper) new CsvMapper().registerModule(new JavaTimeModule());
         CsvSchema schema = mapper.schemaFor(Skater.class).withUseHeader(true);

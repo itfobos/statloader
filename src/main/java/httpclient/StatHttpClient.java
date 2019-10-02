@@ -2,7 +2,8 @@ package httpclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import dtos.SkatersStat;
+import dtos.GenericStat;
+import dtos.Skater;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,7 +22,7 @@ public class StatHttpClient {
     private static final String baseUrl = "https://api.nhle.com/stats/rest/";
     private static final HttpClient client = HttpClient.newBuilder().build();
 
-    public static SkatersStat requestSkatersStat(Year fromYear, Year toYear) throws IOException, InterruptedException {
+    public static GenericStat<Skater> requestSkatersStat(Year fromYear, Year toYear) throws IOException, InterruptedException {
         String fromSeasonId = String.format("%s%s", fromYear, fromYear.plusYears(1));
         String toSeasonId = String.format("%s%s", toYear.minusYears(1), toYear);
 
@@ -44,9 +45,9 @@ public class StatHttpClient {
         }
 
         @SuppressWarnings("UnnecessaryLocalVariable")
-        SkatersStat stat = new ObjectMapper()
+        GenericStat<Skater> stat = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
-                .readerFor(SkatersStat.class)
+                .readerFor(GenericStat.class)
                 .readValue(response.body());
 
         return stat;

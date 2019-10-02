@@ -2,7 +2,7 @@ package dtos;
 
 import java.util.List;
 
-public class SkatersStat {
+public class GenericStat<D> {
     public int total;
-    public List<Skater> data;
+    public List<D> data;
 }
