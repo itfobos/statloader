@@ -8,6 +8,7 @@ import dtos.Team;
 import httpclient.StatHttpClient;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -51,26 +52,23 @@ public class App {
     private void loadTeams() throws IOException, InterruptedException {
         GenericStat<Team> skatersStat = StatHttpClient.requestTeamStat(cliArguments.getFromSeason(), cliArguments.getToSeason());
 
-        CsvMapper mapper = (CsvMapper) new CsvMapper().registerModule(new JavaTimeModule());
-        CsvSchema schema = mapper.schemaFor(Team.class).withUseHeader(true);
-
-        FileOutputStream tempFileOutputStream = new FileOutputStream(cliArguments.getTeamsStatOutFile());
-        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(tempFileOutputStream, 1024);
-        OutputStreamWriter writerOutputStream = new OutputStreamWriter(bufferedOutputStream, StandardCharsets.UTF_8);
-
-        mapper.writer(schema).writeValue(writerOutputStream, skatersStat.data);
+        persisStatData(skatersStat, Team.class, cliArguments.getTeamsStatOutFile());
     }
 
     private void loadPlayers() throws IOException, InterruptedException {
         GenericStat<Skater> skatersStat = StatHttpClient.requestSkatersStat(cliArguments.getFromSeason(), cliArguments.getToSeason());
 
-        CsvMapper mapper = (CsvMapper) new CsvMapper().registerModule(new JavaTimeModule());
-        CsvSchema schema = mapper.schemaFor(Skater.class).withUseHeader(true);
+        persisStatData(skatersStat, Skater.class, cliArguments.getPlayerStatOutFile());
+    }
 
-        FileOutputStream tempFileOutputStream = new FileOutputStream(cliArguments.getPlayerStatOutFile());
+    private void persisStatData(GenericStat statData, Class schemaClass, File outputFile) throws IOException {
+        CsvMapper mapper = (CsvMapper) new CsvMapper().registerModule(new JavaTimeModule());
+        CsvSchema schema = mapper.schemaFor(schemaClass).withUseHeader(true);
+
+        FileOutputStream tempFileOutputStream = new FileOutputStream(outputFile);
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(tempFileOutputStream, 1024);
         OutputStreamWriter writerOutputStream = new OutputStreamWriter(bufferedOutputStream, StandardCharsets.UTF_8);
 
-        mapper.writer(schema).writeValue(writerOutputStream, skatersStat.data);
+        mapper.writer(schema).writeValue(writerOutputStream, statData.data);
     }
 }

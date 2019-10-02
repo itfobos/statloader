@@ -29,24 +29,7 @@ public class StatHttpClient {
         String params = makeUrlParamsString(fromYear, toYear);
         String url = baseUrl + "team?reportName=teamsummary&" + params;
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            System.err.println(response);
-            throw new IOException("Response code is not OK: " + response.statusCode());
-        }
-
-        @SuppressWarnings("UnnecessaryLocalVariable")
-        GenericStat stat = new ObjectMapper()
-                .registerModule(new JavaTimeModule())
-                .readerFor(GenericStat.class)
-                .readValue(response.body());
-
-        return stat;
+        return makeStatRequest(url);
     }
 
     public static GenericStat<Skater> requestSkatersStat(Year fromYear, Year toYear) throws IOException, InterruptedException {
@@ -54,6 +37,10 @@ public class StatHttpClient {
 
         String url = baseUrl + "skaters?reportName=skatersummary&" + params;
 
+        return makeStatRequest(url);
+    }
+
+    private static <D> GenericStat<D> makeStatRequest(String url) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
@@ -65,13 +52,10 @@ public class StatHttpClient {
             throw new IOException("Response code is not OK: " + response.statusCode());
         }
 
-        @SuppressWarnings("UnnecessaryLocalVariable")
-        GenericStat<Skater> stat = new ObjectMapper()
+        return new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .readerFor(GenericStat.class)
                 .readValue(response.body());
-
-        return stat;
     }
 
     private static String makeUrlParamsString(Year fromYear, Year toYear) {
