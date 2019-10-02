@@ -2,6 +2,7 @@ import cli.CliArguments;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dtos.Game;
 import dtos.GenericStat;
 import dtos.Skater;
 import dtos.Team;
@@ -41,18 +42,24 @@ public class App {
             loadTeams();
             System.out.println("Teams stat has been saved in file: " + cliArguments.getTeamsStatOutFile());
         }
+
+        if (cliArguments.isGamesStatRequired()) {
+            System.out.println("Games stat will be loaded");
+            loadGames();
+            System.out.println("Games stat has been saved in file: " + cliArguments.getGamesStatOutFile());
+        }
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        CliArguments cliArguments = CliArguments.fromArgs(args);
+    private void loadGames() throws IOException, InterruptedException {
+        GenericStat<Game> stat = StatHttpClient.requestGamesStat(cliArguments.getFromSeason(), cliArguments.getToSeason());
 
-        new App(cliArguments).loadAndPersistStat();
+        persisStatData(stat, Game.class, cliArguments.getGamesStatOutFile());
     }
 
     private void loadTeams() throws IOException, InterruptedException {
-        GenericStat<Team> skatersStat = StatHttpClient.requestTeamStat(cliArguments.getFromSeason(), cliArguments.getToSeason());
+        GenericStat<Team> stat = StatHttpClient.requestTeamStat(cliArguments.getFromSeason(), cliArguments.getToSeason());
 
-        persisStatData(skatersStat, Team.class, cliArguments.getTeamsStatOutFile());
+        persisStatData(stat, Team.class, cliArguments.getTeamsStatOutFile());
     }
 
     private void loadPlayers() throws IOException, InterruptedException {
@@ -70,5 +77,11 @@ public class App {
         OutputStreamWriter writerOutputStream = new OutputStreamWriter(bufferedOutputStream, StandardCharsets.UTF_8);
 
         mapper.writer(schema).writeValue(writerOutputStream, statData.data);
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        CliArguments cliArguments = CliArguments.fromArgs(args);
+
+        new App(cliArguments).loadAndPersistStat();
     }
 }

@@ -2,6 +2,7 @@ package httpclient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import dtos.Game;
 import dtos.GenericStat;
 import dtos.Skater;
 import dtos.Team;
@@ -14,9 +15,17 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Month;
 import java.time.Year;
+import java.time.format.DateTimeFormatter;
 
 public class StatHttpClient {
+
+    private static final DateTimeFormatter FROM_GAME_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter TO_GAME_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private StatHttpClient() {
     }
@@ -24,6 +33,28 @@ public class StatHttpClient {
     private static final String baseUrl = "https://api.nhle.com/stats/rest/";
     private static final HttpClient client = HttpClient.newBuilder().build();
 
+    public static GenericStat<Game> requestGamesStat(Year fromYear, Year toYear) throws IOException, InterruptedException {
+        String timeRangeParams = makeGameTimeRangeParam(fromYear, toYear);
+
+        String url = baseUrl
+                + "team?isAggregate=false&reportType=basic&isGame=true&reportName=teamsummary&"
+                + timeRangeParams;
+
+        return makeStatRequest(url);
+    }
+
+    private static String makeGameTimeRangeParam(Year fromYear, Year toYear) throws UnsupportedEncodingException {
+        LocalDate fromDate = fromYear.atMonth(Month.JANUARY).atDay(1);
+        LocalDateTime toDateTime = toYear.atMonth(Month.DECEMBER).atDay(31).atTime(LocalTime.MAX);
+
+        String timeRangeParams = String.format(
+                "leagueId=133 and gameDate>=\"%s\" and gameDate<=\"%s\" and gameTypeId=2",
+                fromDate.format(FROM_GAME_DATE_FORMATTER),
+                toDateTime.format(TO_GAME_DATE_FORMATTER)
+        );
+
+        return "cayenneExp=" + URLEncoder.encode(timeRangeParams, StandardCharsets.UTF_8.toString());
+    }
 
     public static GenericStat<Team> requestTeamStat(Year fromYear, Year toYear) throws IOException, InterruptedException {
         String params = makeUrlParamsString(fromYear, toYear);
@@ -62,14 +93,14 @@ public class StatHttpClient {
         String fromSeasonId = String.format("%s%s", fromYear, fromYear.plusYears(1));
         String toSeasonId = String.format("%s%s", toYear.minusYears(1), toYear);
 
-        String timeBordersCondition =
+        String timeRangeCondition =
                 String.format("leagueId=133 and gameTypeId=2 and seasonId>=%s and seasonId<=%s", fromSeasonId, toSeasonId);
         try {
-            timeBordersCondition = URLEncoder.encode(timeBordersCondition, StandardCharsets.UTF_8.toString());
+            timeRangeCondition = URLEncoder.encode(timeRangeCondition, StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
 
-        return "isAggregate=false&reportType=basic&isGame=false&cayenneExp=" + timeBordersCondition;
+        return "isAggregate=false&reportType=basic&isGame=false&cayenneExp=" + timeRangeCondition;
     }
 }
