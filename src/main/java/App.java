@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dtos.GenericStat;
 import dtos.Skater;
+import dtos.Team;
 import httpclient.StatHttpClient;
 
 import java.io.BufferedOutputStream;
@@ -33,12 +34,31 @@ public class App {
             loadPlayers();
             System.out.println("Players stat has been saved in file: " + cliArguments.getPlayerStatOutFile());
         }
+
+        if (cliArguments.isTeamsStatRequired()) {
+            System.out.println("Teams stat will be loaded");
+            loadTeams();
+            System.out.println("Teams stat has been saved in file: " + cliArguments.getTeamsStatOutFile());
+        }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         CliArguments cliArguments = CliArguments.fromArgs(args);
 
         new App(cliArguments).loadAndPersistStat();
+    }
+
+    private void loadTeams() throws IOException, InterruptedException {
+        GenericStat<Team> skatersStat = StatHttpClient.requestTeamStat(cliArguments.getFromSeason(), cliArguments.getToSeason());
+
+        CsvMapper mapper = (CsvMapper) new CsvMapper().registerModule(new JavaTimeModule());
+        CsvSchema schema = mapper.schemaFor(Team.class).withUseHeader(true);
+
+        FileOutputStream tempFileOutputStream = new FileOutputStream(cliArguments.getTeamsStatOutFile());
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(tempFileOutputStream, 1024);
+        OutputStreamWriter writerOutputStream = new OutputStreamWriter(bufferedOutputStream, StandardCharsets.UTF_8);
+
+        mapper.writer(schema).writeValue(writerOutputStream, skatersStat.data);
     }
 
     private void loadPlayers() throws IOException, InterruptedException {
