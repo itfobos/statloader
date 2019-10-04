@@ -30,6 +30,9 @@ public class CliArguments {
     private boolean gamesStatRequired;
     private File gamesStatOutFile;
 
+    private boolean gameByGameStatRequired;
+    private File gameByGameStatOutFile;
+
     private CliArguments(String... args) {
         try {
             commandLine = PARSER.parse(OPTIONS, args);
@@ -52,6 +55,9 @@ public class CliArguments {
 
     private static final String GAMES_OPT = "games";
     private static final String GAMES_OUT_FILE_OPT = "gamesOutFile";
+
+    private static final String GAMES_BY_GAME_OPT = "gameByGame";
+    private static final String GAMES_BY_GAME_OUT_FILE_OPT = "gameByGameOutFile";
 
     private static final HelpFormatter HELP_FORMATTER = new HelpFormatter();
 
@@ -104,6 +110,13 @@ public class CliArguments {
         gamesStatOutFile = optionFlagAndOutFile.outFile;
     }
 
+    private void parseGameByGame() {
+        OptionFlagAndOutFile optionFlagAndOutFile = parseOptionAndOutFile(GAMES_BY_GAME_OPT, GAMES_BY_GAME_OUT_FILE_OPT);
+
+        gameByGameStatRequired = optionFlagAndOutFile.optionFlag;
+        gameByGameStatOutFile = optionFlagAndOutFile.outFile;
+    }
+
     public boolean argumentsAreCorrect() {
         return errors.isEmpty();
     }
@@ -127,6 +140,7 @@ public class CliArguments {
             result.parseTeams();
             result.parsePlayers();
             result.parseGames();
+            result.parseGameByGame();
         }
 
         return result;
@@ -180,6 +194,19 @@ public class CliArguments {
                 .hasArg()
                 .desc("Games stat output file")
                 .build());
+
+
+        OPTIONS.addOption(Option.builder().longOpt(GAMES_BY_GAME_OPT)
+                .required(false)
+                .hasArg(false)
+                .desc("Will games stat be loaded")
+                .build());
+
+        OPTIONS.addOption(Option.builder().longOpt(GAMES_BY_GAME_OUT_FILE_OPT)
+                .required(false)
+                .hasArg()
+                .desc("Games stat output file")
+                .build());
     }
 
     public static void printUsage() {
@@ -216,5 +243,13 @@ public class CliArguments {
 
     public File getGamesStatOutFile() {
         return gamesStatOutFile;
+    }
+
+    public boolean isGameByGameStatRequired() {
+        return gameByGameStatRequired;
+    }
+
+    public File getGameByGameStatOutFile() {
+        return gameByGameStatOutFile;
     }
 }

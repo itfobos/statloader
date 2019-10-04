@@ -3,6 +3,7 @@ package httpclient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dtos.Game;
+import dtos.GameByGamePlayerStat;
 import dtos.GenericStat;
 import dtos.Skater;
 import dtos.Team;
@@ -32,6 +33,17 @@ public class StatHttpClient {
 
     private static final String baseUrl = "https://api.nhle.com/stats/rest/";
     private static final HttpClient client = HttpClient.newBuilder().build();
+
+    public static GenericStat<GameByGamePlayerStat> requestGameByGamePlayerStat(Year fromYear, Year toYear)
+            throws IOException, InterruptedException {
+        String timeRangeParams = makeGameTimeRangeParam(fromYear, toYear);
+
+        String url = baseUrl
+                + "skaters?isAggregate=false&reportType=basic&isGame=true&reportName=skatersummary&"
+                + timeRangeParams;
+
+        return makeStatRequest(url);
+    }
 
     public static GenericStat<Game> requestGamesStat(Year fromYear, Year toYear) throws IOException, InterruptedException {
         String timeRangeParams = makeGameTimeRangeParam(fromYear, toYear);

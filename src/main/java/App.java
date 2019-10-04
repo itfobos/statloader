@@ -3,6 +3,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dtos.Game;
+import dtos.GameByGamePlayerStat;
 import dtos.GenericStat;
 import dtos.Skater;
 import dtos.Team;
@@ -48,6 +49,18 @@ public class App {
             loadGames();
             System.out.println("Games stat has been saved in file: " + cliArguments.getGamesStatOutFile());
         }
+
+        if (cliArguments.isGameByGameStatRequired()) {
+            System.out.println("Games by game stat will be loaded");
+            loadGameByGameStat();
+            System.out.println("Games by game stat has been saved in file: " + cliArguments.getGameByGameStatOutFile());
+        }
+    }
+
+    private void loadGameByGameStat() throws IOException, InterruptedException {
+        GenericStat<GameByGamePlayerStat> stat = StatHttpClient.requestGameByGamePlayerStat(cliArguments.getFromSeason(), cliArguments.getToSeason());
+
+        persisStatData(stat, GameByGamePlayerStat.class, cliArguments.getGameByGameStatOutFile());
     }
 
     private void loadGames() throws IOException, InterruptedException {
