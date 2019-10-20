@@ -3,11 +3,11 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import dtos.Game;
-import dtos.GameByGamePlayerStat;
 import dtos.GenericStat;
 import dtos.Skater;
 import dtos.Team;
 import httpclient.StatHttpClient;
+import services.GameByGamePlayerStatService;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -58,9 +58,11 @@ public class App {
     }
 
     private void loadGameByGameStat() throws IOException, InterruptedException {
-        GenericStat<GameByGamePlayerStat> stat = StatHttpClient.requestGameByGamePlayerStat(cliArguments.getFromSeason(), cliArguments.getToSeason());
+        GameByGamePlayerStatService.loadAndPersistData(
+                cliArguments.getFromSeason(),
+                cliArguments.getToSeason(),
+                cliArguments.getGameByGameStatOutFile());
 
-        persisStatData(stat, GameByGamePlayerStat.class, cliArguments.getGameByGameStatOutFile());
     }
 
     private void loadGames() throws IOException, InterruptedException {
@@ -87,9 +89,10 @@ public class App {
 
         FileOutputStream tempFileOutputStream = new FileOutputStream(outputFile);
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(tempFileOutputStream, 1024);
-        OutputStreamWriter writerOutputStream = new OutputStreamWriter(bufferedOutputStream, StandardCharsets.UTF_8);
 
-        mapper.writer(schema).writeValue(writerOutputStream, statData.data);
+        try (OutputStreamWriter writerOutputStream = new OutputStreamWriter(bufferedOutputStream, StandardCharsets.UTF_8)) {
+            mapper.writer(schema).writeValue(writerOutputStream, statData.data);
+        }
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {

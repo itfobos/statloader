@@ -11,5 +11,5 @@
 ### Load Games stat
 `--fromSeason 1988 --toSeason 2018 --games --gamesOutFile=/path/to/games-1988-2018.csv`
 
-### Load Game by game stat
+### Load Game by game players stat
 `--fromSeason=1988 --toSeason=2018 --gameByGame --gameByGameOutFile=/home/ilya/tmp/gameByGamePlayersStat-1988-2018.csv`
